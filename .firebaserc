@@ -1,8 +1,0 @@
-{
-  "projects": {
-    "default": "your-project-id",
-    "staging": "voting-app-1a4cd"
-  },
-  "targets": {},
-  "etags": {}
-}
