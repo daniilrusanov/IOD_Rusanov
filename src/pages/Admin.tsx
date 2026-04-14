@@ -169,7 +169,14 @@ export default function Admin() {
         </ul>
       </section>
 
-      <button className="link-btn" onClick={() => navigate('/')}>На головну</button>
+      <div className="admin-footer-links">
+        <button className="link-btn" type="button" onClick={() => navigate('/lab3')}>
+          ЛР3 — колективне ранжування
+        </button>
+        <button className="link-btn" type="button" onClick={() => navigate('/')}>
+          На головну
+        </button>
+      </div>
     </div>
   );
 }
