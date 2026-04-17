@@ -129,6 +129,88 @@ export interface MedianResult {
   permutationsMinMax: number[][];
 }
 
+/**
+ * Усі перестановки, у яких на першому місці (ранг 1) зафіксовано об'єкт `first`.
+ * Декомпозиція: ∪_first P_first = {усі перестановки}; перетини порожні — кожна перестановка
+ * має рівно один об'єкт на першій позиції.
+ */
+export function* generatePermutationsWithFixedFirst(n: number, first: number): Generator<number[]> {
+  const others: number[] = [];
+  for (let i = 0; i < n; i++) if (i !== first) others.push(i);
+  const m = others.length;
+  if (m === 0) {
+    yield [first];
+    return;
+  }
+  for (const tail of generatePermutations(m)) {
+    const perm = new Array<number>(n);
+    perm[0] = first;
+    for (let k = 0; k < m; k++) perm[1 + k] = others[tail[k]];
+    yield perm;
+  }
+}
+
+/** Злиття часткових результатів з різних воркерів (декомпозиція за першим елементом). */
+export function mergeMedianResults(parts: MedianResult[]): MedianResult {
+  if (parts.length === 0) {
+    return { minSum: 0, permutationsMinSum: [], minMax: 0, permutationsMinMax: [] };
+  }
+  let minSum = parts[0].minSum;
+  let minMax = parts[0].minMax;
+  for (const p of parts) {
+    minSum = Math.min(minSum, p.minSum);
+    minMax = Math.min(minMax, p.minMax);
+  }
+  const permutationsMinSum = parts.flatMap((p) => (p.minSum === minSum ? p.permutationsMinSum : []));
+  const permutationsMinMax = parts.flatMap((p) => (p.minMax === minMax ? p.permutationsMinMax : []));
+  return { minSum, permutationsMinSum, minMax, permutationsMinMax };
+}
+
+/**
+ * Прямий перебір лише для перестановок з perm[0] ∈ firstValues (розбиття на підзадачі).
+ */
+export function bruteForceMediansPartial(
+  triples: [number, number, number][],
+  n: number,
+  firstValues: number[]
+): MedianResult {
+  if (n <= 0) {
+    return { minSum: 0, permutationsMinSum: [], minMax: 0, permutationsMinMax: [] };
+  }
+  if (triples.length === 0) {
+    const id = Array.from({ length: n }, (_, i) => i);
+    return { minSum: 0, permutationsMinSum: [[...id]], minMax: 0, permutationsMinMax: [[...id]] };
+  }
+  if (firstValues.length === 0) {
+    return { minSum: Infinity, permutationsMinSum: [], minMax: Infinity, permutationsMinMax: [] };
+  }
+  let minSum = Infinity;
+  let minMax = Infinity;
+  const permutationsMinSum: number[][] = [];
+  const permutationsMinMax: number[][] = [];
+
+  for (const first of firstValues) {
+    for (const perm of generatePermutationsWithFixedFirst(n, first)) {
+      const { sum, max } = cookSumMax(perm, triples);
+      if (sum < minSum) {
+        minSum = sum;
+        permutationsMinSum.length = 0;
+        permutationsMinSum.push([...perm]);
+      } else if (sum === minSum) {
+        permutationsMinSum.push([...perm]);
+      }
+      if (max < minMax) {
+        minMax = max;
+        permutationsMinMax.length = 0;
+        permutationsMinMax.push([...perm]);
+      } else if (max === minMax) {
+        permutationsMinMax.push([...perm]);
+      }
+    }
+  }
+  return { minSum, permutationsMinSum, minMax, permutationsMinMax };
+}
+
 /** Повний перебір: мінімуми суми та максимуму відстаней (медіани). */
 export function bruteForceMedians(triples: [number, number, number][], n: number): MedianResult {
   if (n <= 0) {
