@@ -23,6 +23,10 @@ export default function Home() {
           <h2>ЛР4 — Розподілені компроміси</h2>
           <p>Перебір, задоволеність експертів, ГА для великого n</p>
         </Link>
+        <Link to="/help" className="nav-card info">
+          <h2>❓ Допомога</h2>
+          <p>Система допомоги на всіх етапах роботи</p>
+        </Link>
         <Link to="/admin" className="nav-card admin">
           <h2>Адмін</h2>
           <p>Перегляд результатів та протоколу</p>

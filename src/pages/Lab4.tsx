@@ -75,7 +75,7 @@ export default function Lab4() {
   const [lab1Votes, setLab1Votes] = useState<Lab1Vote[]>([]);
   const [lab2Votes, setLab2Votes] = useState<Lab2Vote[]>([]);
   const [loading, setLoading] = useState(true);
-  const [teacherName, setTeacherName] = useState('Викладач');
+  const [teacherName] = useState('Викладач');
 
   const [central, setCentral] = useState<{ result: MedianResult; timeMs: number } | null>(null);
   const [distMain, setDistMain] = useState<{ result: MedianResult; timeMs: number } | null>(null);
